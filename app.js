@@ -1,41 +1,15 @@
-const express = require("express");
+const express = require("express")
 
-const app = express();
+const app = express()
 
-app.use(express.json());
+app.get("/", function (req, res) {
+  res.send("hello world")
+})
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "Origin, X-Requested-With, Content, Accept, Content-Type, Authority"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  next();
-});
+app.get("/example", function (req, res) {
+  res.send("hello from Example  2!!!")
+})
 
-app.post("/api/stuff", (req, res, next) => {
-  console.log(req.body);
-  res.status(201).json({
-    message: "Objet créé !",
-  });
-});
-
-app.use((req, res, next) => {
-  res.status(201);
-  next();
-});
-
-app.use((req, res, next) => {
-  res.json({ message: "Votre requête a bien été recue !" });
-  next();
-});
-
-app.use((req, res) => {
-  console.log("Réponse envoyée avec succès !");
-});
-
-module.express = app;
+app.listen(3000, () => {
+  console.log("server started !!!")
+})
