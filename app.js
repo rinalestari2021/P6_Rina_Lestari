@@ -3,6 +3,9 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
 
+const sauceRoutes = require("./routes/sauce");
+const userRoutes = require("./routes/user");
+
 mongoose
   .connect(
     "mongodb+srv://RinaL2021:Rina2022@cluster0.chx2x.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -28,17 +31,19 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/api/sauces", function (req, res) {
-  res.send("hello world");
-});
+//app.get("/api/sauces", function (req, res) {
+// res.send("hello world");
+//});
 
-app.get("/api/sauces/:id", function (req, res) {
-  res.send("hello from Example  2!!!");
-});
+//app.get("/api/sauces/:id", function (req, res) {
+// res.send("hello from Example  2!!!");
+//});
 
 app.use(bodyParser.json());
 
-pp.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/sauces", sauceRoutes);
+app.use("/auth", userRoutes);
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.listen(3000, () => {
   console.log("server started !!!");
