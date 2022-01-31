@@ -1,5 +1,5 @@
 const express = require("express"); // creating framework express
-const bodyParser = require("body-parser");
+
 const mongoose = require("mongoose"); //cookies database noSQL
 const path = require("path");
 
@@ -39,15 +39,8 @@ app.use((req, res, next) => {
 // res.send("hello from Example  2!!!");
 //});
 
-//app use to dsitribute middleware
-app.use(bodyParser.json());
-
-app.use("/sauces", sauceRoutes);
-app.use("/auth", userRoutes);
 app.use("/images", express.static(path.join(__dirname, "images")));
-
-app.listen(3000, () => {
-  console.log("server started !!!");
-});
+app.use("/api/sauces", sauceRoutes);
+app.use("/api/auth", userRoutes);
 
 module.exports = app;
