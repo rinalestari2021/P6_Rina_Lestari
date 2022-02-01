@@ -1,9 +1,6 @@
 # P6_Rina_Lestari
 
-## TODO
-
-- installer mongo
-- installer mongoose
-
-- communiquer en javascript avec la base de donnee mongo
-- renvoyer des donnees au client
+- only sauce owner can mmodify it
+- return 403 if not
+- only sauce owner can delete it
+- return 403 if not
