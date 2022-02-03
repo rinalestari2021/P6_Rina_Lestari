@@ -1,6 +1,8 @@
 const sauce = require("../models/sauces");
 const fs = require("fs");
+const { throws } = require("assert");
 
+// function create sauce
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id;
@@ -15,6 +17,7 @@ exports.createSauce = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
+//function to get sauce by the id
 exports.getOneSauce = (req, res, next) => {
   sauce
     .findOne({
@@ -30,6 +33,7 @@ exports.getOneSauce = (req, res, next) => {
     });
 };
 
+//function to do modification for the sauce
 exports.modifySauce = (req, res, next) => {
   const sauceObject = req.file
     ? {
@@ -45,21 +49,32 @@ exports.modifySauce = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
+//function delete sauce
 exports.deleteSauce = (req, res, next) => {
   sauce
     .findOne({ _id: req.params.id })
     .then((sauce) => {
-      const filename = sauce.imageUrl.split("/images/")[1];
+      // function and verification only userId who create can delete the objet
+      if (!sauce) {
+        return res.status(403).json({ error: new Error("No such thing!") });
+      }
+      if (sauce.userId !== req.auth.userId) {
+        return res
+          .status(403)
+          .json({ error: new Error("Unauthorized request") });
+      }
+      const filename = thing.imageUrl.split("/images/")[1];
       fs.unlink(`images/${filename}`, () => {
         sauce
           .deleteOne({ _id: req.params.id })
-          .then(() => res.status(200).json({ message: "Objet supprimé !" }))
+          .then(() => res.status(200).json({ message: "Object deleted !" }))
           .catch((error) => res.status(400).json({ error }));
       });
     })
     .catch((error) => res.status(500).json({ error }));
 };
 
+//function to get all the sauce
 exports.getAllSauce = (req, res, next) => {
   sauce
     .find()
@@ -73,6 +88,7 @@ exports.getAllSauce = (req, res, next) => {
     });
 };
 
+//Function like, disliked
 exports.likeDataUser = (req, res, next) => {
   sauce
     .findOne({ _id: req.params.id })
@@ -99,8 +115,8 @@ exports.likeDataUser = (req, res, next) => {
               .catch((error) => res.status(400).json({ error }));
           }
           break;
+        //disliked
         case -1:
-          //disliked
           if (
             !objet.userDisliked.includes(req.body.userId) &&
             req.body.like === -1
@@ -121,8 +137,8 @@ exports.likeDataUser = (req, res, next) => {
               .catch((error) => res.status(400).json({ error }));
           }
           break;
+        // like = 0 means no like
         case 0:
-          // like = 0 means no like
           if (objet.userLiked.includes(req.body.userId)) {
             console.log("userLiked and case = 0");
             //update objet dans base de donner with operator $pull
