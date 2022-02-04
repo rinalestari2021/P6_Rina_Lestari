@@ -4,14 +4,13 @@ const mongoose = require("mongoose"); //import mongoose
 const sauceSchema = mongoose.Schema({
   userId: { type: String, required: true },
   name: { type: String, required: true },
+  manufacturer: { type: String, required: true },
   description: { type: String, required: true },
   mainPepper: { type: String, required: true },
   imageUrl: { type: String, required: true },
   heat: { type: Number, required: true },
-
-  // adding new options like/dislike
-  like: { type: Number, defaut: 0 },
-  disLikes: { type: Number, defaut: 0 },
+  likes: { type: Number, required: true },
+  disLikes: { type: Number, required: true },
   usersLiked: { type: [String] },
   usersDisliked: { type: [String] },
 });
