@@ -1,6 +1,6 @@
 const Sauce = require("../models/sauces");
-const fs = require("fs");
-const { throws } = require("assert");
+const fs = require("fs"); //The fs module enables interacting with the file system in a way modeled on standard POSIX functions.
+const { throws } = require("assert"); //The assert module provides a set of assertion functions for verifying invariants.
 
 // function create sauce
 exports.createSauce = (req, res, next) => {
@@ -88,16 +88,15 @@ exports.getAllSauce = (req, res, next) => {
 };
 
 //Function like, disliked
-exports.likeDataUser = (req, res, next) => {
+exports.likeSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
-    .then((objet) => {
-      switch (req.body.likes) {
+    .then((Sauce) => {
+      switch (req.body.like) {
         case 1:
           if (
-            !objet.userLiked.includes(req.body.userId) &&
-            req.body.likes === 1
+            !Sauce.userLiked.includes(req.body.userId) &&
+            req.body.like === 1
           ) {
-            console.log("instructions executed");
             //update objet dans base de donner with operator $inc
             Sauce.updateOne(
               { _id: req.params.id },
@@ -106,19 +105,17 @@ exports.likeDataUser = (req, res, next) => {
                 $push: { usersLiked: req.body.userId },
               }
             )
-              .then(() =>
-                res.status(201).json({ message: "dataUser likes + 1" })
-              )
+              .then(() => res.status(201).json({ message: "userlikes + 1" }))
               .catch((error) => res.status(400).json({ error }));
           }
           break;
+
         //disliked
         case -1:
           if (
-            !objet.userDisliked.includes(req.body.userId) &&
-            req.body.likes === -1
+            !Sauce.userDisliked.includes(req.body.userId) &&
+            req.body.like === -1
           ) {
-            console.log("userDisliked et dislikes = 1");
             //update objet dans base de donner with operator $inc
             Sauce.updateOne(
               { _id: req.params.id },
@@ -128,15 +125,15 @@ exports.likeDataUser = (req, res, next) => {
               }
             )
               .then(() =>
-                res.status(201).json({ message: "dataUser disliked + 1" })
+                res.status(201).json({ message: "user disliked + 1" })
               )
               .catch((error) => res.status(400).json({ error }));
           }
           break;
+
         // like = 0 means no like
         case 0:
-          if (objet.userLiked.includes(req.body.userId)) {
-            console.log("userLiked and case = 0");
+          if (Sauce.userLiked.includes(req.body.userId)) {
             //update objet dans base de donner with operator $pull
             Sauce.updateOne(
               { _id: req.params.id },
@@ -145,13 +142,10 @@ exports.likeDataUser = (req, res, next) => {
                 $pull: { usersLiked: req.body.userId },
               }
             )
-              .then(() =>
-                res.status(201).json({ message: "dataUser like = 0" })
-              )
+              .then(() => res.status(201).json({ message: "userliked = 0" }))
               .catch((error) => res.status(400).json({ error }));
           }
-          if (objet.userDisliked.includes(req.body.userId)) {
-            console.log("userDisliked and like = 0 ");
+          if (Sauce.userDisliked.includes(req.body.userId)) {
             //update objet dans base de donner
             Sauce.updateOne(
               { _id: req.params.id },
@@ -160,7 +154,7 @@ exports.likeDataUser = (req, res, next) => {
                 $pull: { usersDisliked: req.body.userId },
               }
             )
-              .then(() => res.status(201).json({ message: "dataUser like 0" }))
+              .then(() => res.status(201).json({ message: "userdisliked 0" }))
               .catch((error) => res.status(400).json({ error }));
           }
           break;

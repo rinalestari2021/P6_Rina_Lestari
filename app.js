@@ -1,4 +1,5 @@
 const express = require("express"); // creating framework express
+const helmet = require("helmet"); // security for express app by setting various HTTP headers
 
 const mongoose = require("mongoose"); //cookies database noSQL
 const path = require("path");
@@ -17,6 +18,7 @@ mongoose
 const app = express();
 
 app.use(express.json());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -30,14 +32,6 @@ app.use((req, res, next) => {
   );
   next();
 });
-
-//app.get("/api/sauces", function (req, res) {
-// res.send("hello world");
-//});
-
-//app.get("/api/sauces/:id", function (req, res) {
-// res.send("hello from Example  2!!!");
-//});
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/sauces", sauceRoutes);

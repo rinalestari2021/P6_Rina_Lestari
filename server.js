@@ -1,3 +1,6 @@
+/**
+ * const http = To use the HTTP server
+ */
 const http = require("http");
 const app = require("./app");
 
