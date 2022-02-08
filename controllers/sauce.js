@@ -11,7 +11,7 @@ exports.createSauce = (req, res, next) => {
       req.file.filename
     }`,
     likes: 0,
-    disLikes: 0,
+    dislikes: 0,
     userLiked: [],
     userDisliked: [],
   });
@@ -89,75 +89,67 @@ exports.getAllSauce = (req, res, next) => {
 
 //Function like, disliked
 exports.likeSauce = (req, res, next) => {
+  const like = JSON.parse(req.body.like);
   Sauce.findOne({ _id: req.params.id })
     .then((Sauce) => {
-      switch (req.body.like) {
+      switch (like) {
         case 1:
-          if (
-            !Sauce.userLiked.includes(req.body.userId) &&
-            req.body.like === 1
-          ) {
-            //update objet dans base de donner with operator $inc
-            Sauce.updateOne(
-              { _id: req.params.id },
-              {
-                $inc: { likes: 1 },
-                $push: { usersLiked: req.body.userId },
-              }
-            )
-              .then(() => res.status(201).json({ message: "userlikes + 1" }))
-              .catch((error) => res.status(400).json({ error }));
-          }
+          //update objet dans base de donner with operator $inc
+          Sauce.updateOne(
+            { _id: req.params.id },
+            {
+              $inc: { likes: 1 },
+              $push: { usersLiked: req.body.userId },
+            }
+          )
+            .then(() => res.status(201).json({ message: "userlikes + 1" }))
+            .catch((error) => res.status(400).json({ error }));
+
           break;
 
         //disliked
         case -1:
-          if (
-            !Sauce.userDisliked.includes(req.body.userId) &&
-            req.body.like === -1
-          ) {
-            //update objet dans base de donner with operator $inc
-            Sauce.updateOne(
-              { _id: req.params.id },
-              {
-                $inc: { dislikes: 1 },
-                $push: { usersDisliked: req.body.userId },
-              }
-            )
-              .then(() =>
-                res.status(201).json({ message: "user disliked + 1" })
-              )
-              .catch((error) => res.status(400).json({ error }));
-          }
+          //update objet dans base de donner with operator $inc
+          Sauce.updateOne(
+            { _id: req.params.id },
+            {
+              $inc: { dislikes: 1 },
+              $push: { usersDisliked: req.body.userId },
+            }
+          )
+            .then(() => res.status(201).json({ message: "user disliked + 1" }))
+            .catch((error) => res.status(400).json({ error }));
+
           break;
 
         // like = 0 means no like
         case 0:
-          if (Sauce.userLiked.includes(req.body.userId)) {
-            //update objet dans base de donner with operator $pull
-            Sauce.updateOne(
-              { _id: req.params.id },
-              {
-                $inc: { likes: -1 },
-                $pull: { usersLiked: req.body.userId },
-              }
-            )
-              .then(() => res.status(201).json({ message: "userliked = 0" }))
-              .catch((error) => res.status(400).json({ error }));
-          }
-          if (Sauce.userDisliked.includes(req.body.userId)) {
-            //update objet dans base de donner
-            Sauce.updateOne(
-              { _id: req.params.id },
-              {
-                $inc: { dislikes: -1 },
-                $pull: { usersDisliked: req.body.userId },
-              }
-            )
-              .then(() => res.status(201).json({ message: "userdisliked 0" }))
-              .catch((error) => res.status(400).json({ error }));
-          }
+          Sauce.userLiked.includes(req.body.userId);
+          //update objet dans base de donner with operator $pull
+          Sauce.updateOne(
+            { _id: req.params.id },
+            {
+              $inc: { likes: -1 },
+              $pull: { usersLiked: req.body.userId },
+            }
+          )
+            .then(() => res.status(201).json({ message: "userliked = 0" }))
+            .catch((error) => res.status(400).json({ error }));
+
+          Sauce.userDisliked.includes(req.body.userId);
+          //update objet dans base de donner
+          Sauce.updateOne(
+            { _id: req.params.id },
+            {
+              $inc: { dislikes: -1 },
+              $pull: { usersDisliked: req.body.userId },
+            }
+          )
+            .then(() => res.status(201).json({ message: "userdisliked 0" }))
+            .catch((error) => res.status(400).json({ error }));
+
           break;
+        default:
       }
     })
     .catch((error) => res.status(404).json({ error }));
