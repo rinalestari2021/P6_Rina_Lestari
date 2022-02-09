@@ -38,20 +38,43 @@ exports.getOneSauce = (req, res, next) => {
 
 //function to do modification for the sauce
 exports.modifySauce = (req, res, next) => {
-  const sauceObject = req.file
-    ? {
-        ...JSON.parse(req.body.sauce),
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${
-          req.file.filename
-        }`,
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
+  const userId = decodedToken.userId;
+  Sauce.findOne({ _id: req.params.id })
+    .then((sauce) => {
+      //Function security only the owner of object can do the modification
+      if (req.file && sauce.userId == userId) {
+        const filename = sauce.imageUrl.split("/images/")[1];
+        fs.unlink(`images/${filename}`, (error) => {
+          if (error) throw error;
+        }).catch((error) => {
+          res.status(403).json({ error });
+        });
       }
-    : { ...req.body };
-  Sauce.updateOne(
-    { _id: req.params.id },
-    { ...sauceObject, _id: req.params.id }
-  )
-    .then(() => res.status(200).json({ message: "Object modified !" }))
-    .catch((error) => res.status(403).json({ error }));
+      if (sauce.userId == userId) {
+        const sauceObject = req.file
+          ? {
+              ...JSON.parse(req.body.sauce),
+              imageUrl: `${req.protocol}://${req.get("host")}/images/${
+                req.file.filename
+              }`,
+            }
+          : { ...req.body };
+        Sauce.updateOne(
+          { _id: req.params.id },
+          { ...sauceObject, _id: req.params.id }
+        )
+          .then(() => res.status(200).json({ message: "Object modified !" }))
+          .catch((error) => res.status(403).json({ error }));
+      } else {
+        res
+          .status(403)
+          .json({ message: "only user who created can modify" })
+          .catch((error) => res.status(403).json({ error }));
+      }
+    })
+    .catch((error) => res.status(500).json({ error }));
 };
 
 //function delete sauce
@@ -90,6 +113,7 @@ exports.getAllSauce = (req, res, next) => {
 //Function like, disliked
 exports.likeSauce = (req, res, next) => {
   const like = JSON.parse(req.body.like);
+  console.log("like", like);
   Sauce.findOne({ _id: req.params.id })
     .then((Sauce) => {
       switch (like) {
@@ -122,7 +146,7 @@ exports.likeSauce = (req, res, next) => {
 
           break;
 
-        // like = 0 means no like
+        // like = 0 means neutral
         case 0:
           Sauce.userLiked.includes(req.body.userId);
           //update objet dans base de donner with operator $pull

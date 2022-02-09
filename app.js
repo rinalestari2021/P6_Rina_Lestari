@@ -18,7 +18,6 @@ mongoose
 const app = express();
 
 app.use(express.json());
-app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -33,6 +32,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/sauces", sauceRoutes);
 app.use("/api/auth", userRoutes);
