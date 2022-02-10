@@ -7,6 +7,7 @@ const path = require("path");
 const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
+// acces to BBD
 mongoose
   .connect(
     "mongodb+srv://RinaL2021:Rina2022@cluster0.chx2x.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -15,8 +16,10 @@ mongoose
   .then(() => console.log("Connected to MongoDB !"))
   .catch(() => console.log("Can not connected to MongoDB !"));
 
+//Creates an Express application.
 const app = express();
 
+//assign middleware to application specific route
 app.use(express.json());
 
 app.use((req, res, next) => {

@@ -118,7 +118,7 @@ exports.likeSauce = (req, res, next) => {
     .then((Sauce) => {
       switch (like) {
         case 1:
-          //update objet dans base de donner with operator $inc
+          //update object inside BDD with operator $inc
           Sauce.updateOne(
             { _id: req.params.id },
             {
@@ -133,7 +133,7 @@ exports.likeSauce = (req, res, next) => {
 
         //disliked
         case -1:
-          //update objet dans base de donner with operator $inc
+          //update object inside BDD with operator $inc
           Sauce.updateOne(
             { _id: req.params.id },
             {
@@ -148,30 +148,29 @@ exports.likeSauce = (req, res, next) => {
 
         // like = 0 means neutral
         case 0:
-          Sauce.userLiked.includes(req.body.userId);
-          //update objet dans base de donner with operator $pull
-          Sauce.updateOne(
-            { _id: req.params.id },
-            {
-              $inc: { likes: -1 },
-              $pull: { usersLiked: req.body.userId },
-            }
-          )
-            .then(() => res.status(201).json({ message: "userliked = 0" }))
-            .catch((error) => res.status(400).json({ error }));
-
-          Sauce.userDisliked.includes(req.body.userId);
-          //update objet dans base de donner
-          Sauce.updateOne(
-            { _id: req.params.id },
-            {
-              $inc: { dislikes: -1 },
-              $pull: { usersDisliked: req.body.userId },
-            }
-          )
-            .then(() => res.status(201).json({ message: "userdisliked 0" }))
-            .catch((error) => res.status(400).json({ error }));
-
+          if (Sauce.usersLiked.includes(req.body.userId)) {
+            //update object BDD with operator $pull
+            Sauce.updateOne(
+              { _id: req.params.id },
+              {
+                $inc: { likes: -1 },
+                $pull: { usersLiked: req.body.userId },
+              }
+            )
+              .then(() => res.status(201).json({ message: "usersliked = 0" }))
+              .catch((error) => res.status(400).json({ error }));
+          } else if (Sauce.usersDisliked.includes(req.body.userId)) {
+            //update object inside BDD
+            Sauce.updateOne(
+              { _id: req.params.id },
+              {
+                $inc: { dislikes: -1 },
+                $pull: { usersDisliked: req.body.userId },
+              }
+            )
+              .then(() => res.status(201).json({ message: "usersdisliked 0" }))
+              .catch((error) => res.status(400).json({ error }));
+          }
           break;
         default:
       }
