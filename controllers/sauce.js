@@ -38,39 +38,35 @@ exports.getOneSauce = (req, res, next) => {
 
 //function to do modification for the sauce
 exports.modifySauce = (req, res, next) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
-  const userId = decodedToken.userId;
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
+      if (sauce.userId != req.token) {
+        res.status(403).json({ message: "unauthorized" });
+      }
       //Function security only the owner of object can do the modification
-      if (req.file && sauce.userId == userId) {
+      if (req.file) {
         const filename = sauce.imageUrl.split("/images/")[1];
-        fs.unlink(`images/${filename}`, (error) => {
-          if (error) throw error;
-        }).catch((error) => {
-          res.status(403).json({ error });
+        fs.unlink(`images/${filename}`, () => {
+          const sauceObject = {
+            ...req.body,
+            imageUrl: `${req.protocol}://${req.get("host")}/images/${
+              req.file.filename
+            }`,
+          };
+          Sauce.updateOne(
+            { _id: req.params.id },
+            { ...sauceObject, _id: req.params.id }
+          )
+            .then(() => res.status(200).json({ message: "Sauce mise à jour!" }))
+            .catch((error) => res.status(400).json({ error }));
         });
       }
-      if (sauce.userId == userId) {
-        const sauceObject = req.file
-          ? {
-              ...JSON.parse(req.body.sauce),
-              imageUrl: `${req.protocol}://${req.get("host")}/images/${
-                req.file.filename
-              }`,
-            }
-          : { ...req.body };
+      if (!req.file) {
         Sauce.updateOne(
           { _id: req.params.id },
-          { ...sauceObject, _id: req.params.id }
+          { ...req.body, _id: req.params.id }
         )
           .then(() => res.status(200).json({ message: "Object modified !" }))
-          .catch((error) => res.status(403).json({ error }));
-      } else {
-        res
-          .status(403)
-          .json({ message: "only user who created can modify" })
           .catch((error) => res.status(403).json({ error }));
       }
     })
@@ -81,10 +77,13 @@ exports.modifySauce = (req, res, next) => {
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
+      if (sauce.userId != req.token) {
+        res.status(403).json({ message: "unauthorized" });
+      }
       const filename = sauce.imageUrl.split("/images/")[1];
       //controller if the user is connected to delet the object
       //comparing the userId who create object & userId that make action delete
-      if (req.token.userId === sauce.userId) {
+      if (req.token === sauce.userId) {
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
             .then(() => res.status(200).json({ message: "Object deleted !" }))
@@ -115,7 +114,7 @@ exports.likeSauce = (req, res, next) => {
   const like = JSON.parse(req.body.like);
   console.log("like", like);
   Sauce.findOne({ _id: req.params.id })
-    .then((Sauce) => {
+    .then((sauce) => {
       switch (like) {
         case 1:
           //update object inside BDD with operator $inc
@@ -148,7 +147,7 @@ exports.likeSauce = (req, res, next) => {
 
         // like = 0 means neutral
         case 0:
-          if (Sauce.usersLiked.includes(req.body.userId)) {
+          if (sauce.usersLiked.includes(req.body.userId)) {
             //update object BDD with operator $pull
             Sauce.updateOne(
               { _id: req.params.id },
@@ -159,7 +158,7 @@ exports.likeSauce = (req, res, next) => {
             )
               .then(() => res.status(201).json({ message: "usersliked = 0" }))
               .catch((error) => res.status(400).json({ error }));
-          } else if (Sauce.usersDisliked.includes(req.body.userId)) {
+          } else if (sauce.usersDisliked.includes(req.body.userId)) {
             //update object inside BDD
             Sauce.updateOne(
               { _id: req.params.id },
