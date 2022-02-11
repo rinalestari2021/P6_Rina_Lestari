@@ -1,4 +1,4 @@
-const multer = require("multer");
+const multer = require("multer"); //To handle incoming files in HTTP requests
 
 const MIME_TYPES = {
   "image/jpg": "jpg",
@@ -6,6 +6,7 @@ const MIME_TYPES = {
   "image/png": "png",
 };
 
+//Function to manage object entry and store it in specified storage
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
     callback(null, "images");

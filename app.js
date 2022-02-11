@@ -1,4 +1,5 @@
 const express = require("express"); // creating framework express
+const rateLimit = require("express-rate-limit"); //Use to limit repeated requests to public APIs and/or endpoints such as password reset
 const helmet = require("helmet"); // security for express app by setting various HTTP headers
 
 const mongoose = require("mongoose"); //cookies database noSQL
@@ -7,14 +8,16 @@ const path = require("path");
 const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 
+const dotenv = require("dotenv").config({ encoding: "latin1" }); //using dotenv to manage env variables in nodejs
+
 // acces to BBD
 mongoose
-  .connect(
-    "mongodb+srv://RinaL2021:Rina2022@cluster0.chx2x.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
-  .then(() => console.log("Connected to MongoDB !"))
-  .catch(() => console.log("Can not connected to MongoDB !"));
+  .connect(process.env.MONGOOSE_KEY, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Connecté à MongoDB !"))
+  .catch(() => console.log("Impossible de se connecter à MongoDB !"));
 
 //Creates an Express application.
 const app = express();
@@ -34,6 +37,16 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+app.use(
+  rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 100,
+    message:
+      "Vous avez effectué plus de 100 requétes dans une limite de 24 heures!",
+    headers: true,
+  })
+);
 
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));

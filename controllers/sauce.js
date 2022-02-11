@@ -17,11 +17,11 @@ exports.createSauce = (req, res, next) => {
   });
   sauce
     .save()
-    .then(() => res.status(201).json({ message: "Object uploaded !" }))
+    .then(() => res.status(201).json({ message: "Objet enregistré !" }))
     .catch((error) => res.status(400).json({ error }));
 };
 
-//function to get sauce by the id
+//function to get one sauce by the id
 exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({
     _id: req.params.id,
@@ -41,7 +41,7 @@ exports.modifySauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
       if (sauce.userId != req.token) {
-        res.status(403).json({ message: "unauthorized" });
+        res.status(403).json({ message: "Non autorisé" });
       }
       //Function security only the owner of object can do the modification
       if (req.file) {
@@ -66,7 +66,7 @@ exports.modifySauce = (req, res, next) => {
           { _id: req.params.id },
           { ...req.body, _id: req.params.id }
         )
-          .then(() => res.status(200).json({ message: "Object modified !" }))
+          .then(() => res.status(200).json({ message: "Objet modifié !" }))
           .catch((error) => res.status(403).json({ error }));
       }
     })
@@ -78,7 +78,7 @@ exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
       if (sauce.userId != req.token) {
-        res.status(403).json({ message: "unauthorized" });
+        res.status(403).json({ message: "Non autorisé" });
       }
       const filename = sauce.imageUrl.split("/images/")[1];
       //controller if the user is connected to delet the object
@@ -86,11 +86,11 @@ exports.deleteSauce = (req, res, next) => {
       if (req.token === sauce.userId) {
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
-            .then(() => res.status(200).json({ message: "Object deleted !" }))
+            .then(() => res.status(200).json({ message: "Objet suprimer !" }))
             .catch((error) => res.status(403).json({ error }));
         });
       } else {
-        throw "UserId is different with the userId object creator";
+        throw "UserId est différent avec le créateur de l'objet userId";
       }
     })
     .catch((error) => res.status(500).json({ error }));
@@ -112,7 +112,6 @@ exports.getAllSauce = (req, res, next) => {
 //Function like, disliked
 exports.likeSauce = (req, res, next) => {
   const like = JSON.parse(req.body.like);
-  console.log("like", like);
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
       switch (like) {
@@ -125,7 +124,7 @@ exports.likeSauce = (req, res, next) => {
               $push: { usersLiked: req.body.userId },
             }
           )
-            .then(() => res.status(201).json({ message: "userlikes + 1" }))
+            .then(() => res.status(201).json({ message: "User like + 1" }))
             .catch((error) => res.status(400).json({ error }));
 
           break;
@@ -140,7 +139,7 @@ exports.likeSauce = (req, res, next) => {
               $push: { usersDisliked: req.body.userId },
             }
           )
-            .then(() => res.status(201).json({ message: "user disliked + 1" }))
+            .then(() => res.status(201).json({ message: "User disliked + 1" }))
             .catch((error) => res.status(400).json({ error }));
 
           break;
@@ -156,7 +155,7 @@ exports.likeSauce = (req, res, next) => {
                 $pull: { usersLiked: req.body.userId },
               }
             )
-              .then(() => res.status(201).json({ message: "usersliked = 0" }))
+              .then(() => res.status(201).json({ message: "User like = 0" }))
               .catch((error) => res.status(400).json({ error }));
           } else if (sauce.usersDisliked.includes(req.body.userId)) {
             //update object inside BDD
@@ -167,7 +166,7 @@ exports.likeSauce = (req, res, next) => {
                 $pull: { usersDisliked: req.body.userId },
               }
             )
-              .then(() => res.status(201).json({ message: "usersdisliked 0" }))
+              .then(() => res.status(201).json({ message: "User disliked 0" }))
               .catch((error) => res.status(400).json({ error }));
           }
           break;

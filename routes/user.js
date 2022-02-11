@@ -1,5 +1,5 @@
-const express = require("express");
-const router = express.Router();
+const express = require("express"); //Creates an Express application.
+const router = express.Router(); //Create separate routers for each main route.
 
 const userCtrl = require("../controllers/user");
 
