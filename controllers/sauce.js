@@ -86,7 +86,7 @@ exports.deleteSauce = (req, res, next) => {
       if (req.token === sauce.userId) {
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
-            .then(() => res.status(200).json({ message: "Objet suprimer !" }))
+            .then(() => res.status(200).json({ message: "Objet supprimer !" }))
             .catch((error) => res.status(403).json({ error }));
         });
       } else {
