@@ -5,6 +5,10 @@ url du github : https://github.com/rinalestari2021/P6_Rina_Lestari
 
 Creer votre propre dossier images apres avoir clone
 
+Fichier .env :
+MONGOOSE_KEY: ******
+TOKEN_KEY:******
+
 Pour lancer le serveur backend : npm run start
 
 Routes
